@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Rust SDL2 WASM</title>
+    <style>
+      html, body { margin: 0; padding: 0; background: #000; height: 100%; }
+      canvas { display: block; width: 100%; height: 100%; }
+    </style>
+  </head>
+  <body>
+    <canvas id="canvas"></canvas>
+    <script>
+      var Module = {
+        canvas: document.getElementById("canvas")
+      };
+    </script>
+    <script src="road_intersection.js"></script>
+  </body>
+</html>
