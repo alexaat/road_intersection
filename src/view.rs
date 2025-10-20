@@ -6,12 +6,12 @@ use crate::model::Line;
 use sdl2::rect::{Point, Rect};
 use crate::model::Car;
 use crate::model::TrafficLight;
-
-
+use sdl2::image::LoadTexture;
+use crate::constants::*;
 
 pub struct View {
     canvas: Canvas<Window>,
-    bg_color: (u8, u8, u8),
+    bg_color: (u8, u8, u8)
 }
 
 impl View {
@@ -29,10 +29,64 @@ impl View {
         for car in &model.cars {
             car.draw(&mut self.canvas);
         }
+
+
+        //init textures  
+        let field_width = (SCREEN_WIDTH/2 - CAR_SIZE - MARGIN) as u32;
+        let field_heigth = (SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN) as u32;
+        let url = "assets/images/top_left.png";
+        let texture_creator = self.canvas.texture_creator();        
+        match texture_creator.load_texture(url) {
+            Ok(texture) => {
+                let query = texture.query();
+                let src = Rect::new(0, 0, query.width, query.height);
+        
+                //draw background top-left
+                let dst = Rect::new(0, 0, field_width, field_heigth);
+                let center = Point::new((field_width / 2) as i32, (field_heigth / 2) as i32);
+                if let Err(e) = self.canvas
+                    .copy_ex(&texture, src, dst, 0.0, center, false, false) {
+                        println!("Cannot copy texture: {:?}", e)
+                    }
+
+                //draw background top-right
+                let x = field_width as i32 + CAR_SIZE * 2 + MARGIN * 2;
+                let dst = Rect::new(x, 0, field_width, field_heigth);
+                let center = Point::new(x + (field_width / 2) as i32, (field_heigth / 2) as i32);
+                if let Err(e) = self.canvas
+                    .copy_ex(&texture, src, dst, 0.0, center, true, false){
+                        println!("Cannot copy texture: {:?}", e)
+                    }
+
+                //draw background bottom-left
+                let y = field_heigth as i32 + CAR_SIZE * 2 + MARGIN * 2;
+                let dst = Rect::new(0, y, field_width, field_heigth);
+                let center = Point::new((field_width / 2) as i32,  y + (field_heigth / 2) as i32);
+                if let Err(e) = self.canvas
+                    .copy_ex(&texture, src, dst, 0.0, center, false, true){
+                        println!("Cannot copy texture: {:?}", e)
+                    }
+
+                //draw background bottom-right
+                let dst = Rect::new(x, y, field_width, field_heigth);
+                let center = Point::new(x + (field_width / 2) as i32,  y + (field_heigth / 2) as i32);
+                if let Err(e) = self.canvas
+                    .copy_ex(&texture, src, dst, 0.0, center, true, true){
+                        println!("Cannot copy texture: {:?}", e)
+                    }
+
+            },
+            Err(e) => println!("Cannot load texture: {:?}", e)
+        }      
+  
+
+        //draw traffic lights
         model.traffic_light_switch.update(model.cars.clone());
         for lights in model.traffic_light_switch.traffic_lights.values() {
             lights.draw(&mut self.canvas);
         }
+
+
         self.canvas.present();
     }
 

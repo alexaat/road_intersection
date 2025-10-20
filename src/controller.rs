@@ -14,6 +14,7 @@ const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
 const MAX_CARS_IN_QUEUE: i32 = 7;
 
 
+
 pub struct Controller {
     model: Model,
     view: View,

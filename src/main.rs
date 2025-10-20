@@ -4,9 +4,11 @@ use std::time::Duration;
 mod controller;
 mod model;
 mod view;
+mod constants;
 use controller::Controller;
 use model::Model;
 use view::*;
+
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();

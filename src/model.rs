@@ -1,17 +1,12 @@
 use rand::Rng;
 use std::collections::HashMap;
+use crate::constants::*;
 
-const CAR_SIZE: i32 = 24;
-const SCREEN_WIDTH: i32 = 800;
-const SCREEN_HEIGHT: i32 = 600;
-const MARGIN: i32 = 8;
-const LINE_COLOR: (u8, u8, u8) = (150, 150, 150);
-const LINE_COLOR_2: (u8, u8, u8) = (66, 66, 66);
+const LINE_COLOR_2: (u8, u8, u8) = (100, 100, 100);
 const BREAK_POINT_WEST: i32 = SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_EAST: i32 = SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN;
 const BREAK_POINT_NORTH: i32 = SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
-const SEPARATION_DISTANCE: i32 = 24;
 const CAR_COLOR_LEFT: (u8, u8, u8) = (0, 255, 255);
 const CAR_COLOR_AHEAD: (u8, u8, u8) = (0, 0, 255);
 const CAR_COLOR_RIGHT: (u8, u8, u8) = (255, 255, 0);
@@ -146,105 +141,9 @@ impl Model {
 
     pub fn create_road_markings() -> Vec<Line> {
         let mut lines = vec![];
-        //Top1
-        let start = Point::new(0, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN);
-        let end = Point::new(
-            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
-            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
-        );
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Top2
-        let start = Point::new(
-            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
-            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
-        );
-        let end = Point::new(SCREEN_WIDTH, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN);
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Bottom1
-        let start = Point::new(0, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN);
-        let end = Point::new(
-            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
-            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
-        );
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Bottom2
-        let start = Point::new(
-            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
-            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
-        );
-        let end = Point::new(SCREEN_WIDTH, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN);
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Left1
-        let start = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN, 0);
-        let end = Point::new(
-            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
-            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
-        );
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Left2
-        let start = Point::new(
-            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
-            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
-        );
-        let end = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN, SCREEN_HEIGHT);
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Right1
-        let start = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN, 0);
-        let end = Point::new(
-            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
-            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
-        );
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
-        //Right2
-        let start = Point::new(
-            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
-            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
-        );
-        let end = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN, SCREEN_HEIGHT);
-        let line = Line {
-            start,
-            end,
-            color: LINE_COLOR.clone(),
-        };
-        lines.push(line);
         //Break Point East
         let start = Point::new(BREAK_POINT_EAST, SCREEN_HEIGHT / 2);
-        let end = Point::new(BREAK_POINT_EAST, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN);
+        let end = Point::new(BREAK_POINT_EAST, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
         let line = Line {
             start,
             end,
@@ -252,7 +151,7 @@ impl Model {
         };
         lines.push(line);
         //Break Point West
-        let start = Point::new(BREAK_POINT_WEST, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN);
+        let start = Point::new(BREAK_POINT_WEST, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
         let end = Point::new(BREAK_POINT_WEST, SCREEN_HEIGHT / 2);
         let line = Line {
             start,
@@ -261,8 +160,8 @@ impl Model {
         };
         lines.push(line);
         //Break Point North
-        let start = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN, BREAK_POINT_NORTH);
-        let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_NORTH);
+        let start = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_NORTH);
+        let end = Point::new(SCREEN_WIDTH / 2 , BREAK_POINT_NORTH);
         let line = Line {
             start,
             end,
@@ -270,7 +169,7 @@ impl Model {
         };
         lines.push(line);
         //Break Point South
-        let start = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN, BREAK_POINT_SOUTH);
+        let start = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_SOUTH);
         let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH);
         let line = Line {
             start,
