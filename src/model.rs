@@ -10,6 +10,10 @@ const BREAK_POINT_WEST: i32 = SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_EAST: i32 = SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN;
 const BREAK_POINT_NORTH: i32 = SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
+const SEPARATION_DISTANCE: i32 = 24;
+const CAR_COLOR_LEFT: (u8, u8, u8) = (0, 255, 255);
+const CAR_COLOR_AHEAD: (u8, u8, u8) = (0, 0, 255);
+const CAR_COLOR_RIGHT: (u8, u8, u8) = (255, 255, 0);
 
 pub struct Model {
     pub cars: Vec<Car>,
@@ -28,7 +32,48 @@ impl Model {
     }
 
     pub fn spawn_car(&mut self, location: Location, destination: Destination) {
-        println!("spawned: {:?}, {:?}", location, destination);
+        if !Self::is_overlap(&self.cars, &Car::calculate_initial_position(&location)){
+            let car = Car::new(location, destination);
+            self.cars.push(car);
+        }       
+    }
+
+    //check if new car would spawn too close to existing car
+    pub fn is_overlap(cars: &Vec<Car>, intial_position: &Point) -> bool{
+
+        let x1 = intial_position.x;
+        let y1 = intial_position.y;
+        let x2 = x1 + CAR_SIZE;
+        let y2 = y1 + CAR_SIZE;
+
+        for car in cars {
+            if car.position.x >= x1
+                && car.position.x <= x2 + SEPARATION_DISTANCE
+                && y1 == car.position.y
+            {
+                return true;                
+            }
+
+            if x1 >= car.position.x
+                && x1 <= car.position.x + CAR_SIZE + SEPARATION_DISTANCE
+                && y1 == car.position.y
+            {
+                return true;
+            }
+            if car.position.y >= y1
+                && car.position.y <= y2 + SEPARATION_DISTANCE
+                && x1 == car.position.x
+            {
+                return true;
+            }
+            if y1 >= car.position.y
+                && y1 <= car.position.y + CAR_SIZE + SEPARATION_DISTANCE
+                && x1 == car.position.x
+            {
+                return true;
+            }
+        }
+        false
     }
 
     pub fn create_road_markings() -> Vec<Line> {
@@ -243,6 +288,48 @@ pub struct Car {
     pub destination: Destination,
     pub direction: Location,
 }
+impl Car{
+    pub fn new(location: Location, destination: Destination) -> Self {
+        let position = Car::calculate_initial_position(&location);
+        let dimen = Dimen::new(CAR_SIZE, CAR_SIZE);
+        let (r, g, b) = match destination {
+            Destination::Ahead => CAR_COLOR_AHEAD,
+            Destination::Right => CAR_COLOR_RIGHT,
+            Destination::Left => CAR_COLOR_LEFT,
+        };
+        let direction = match location {
+            Location::East => Location::West,
+            Location::West => Location::East,
+            Location::North => Location::South,
+            Location::South => Location::North,
+        };
+        Self {
+            position,
+            size: dimen,
+            color: (r, g, b),
+            destination,
+            direction,
+        }
+    }
+
+
+    pub fn calculate_initial_position(location: &Location) -> Point {
+        let position = match location {
+            Location::West => Point::new(MARGIN, (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2),
+            Location::North => Point::new((SCREEN_WIDTH + MARGIN) / 2, MARGIN),
+            Location::East => Point::new(
+                SCREEN_WIDTH - CAR_SIZE - MARGIN,
+                (SCREEN_HEIGHT + MARGIN) / 2,
+            ),
+            Location::South => Point::new(
+                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2,
+                SCREEN_HEIGHT - CAR_SIZE - MARGIN,
+            ),
+        };
+        position
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub struct Point {
