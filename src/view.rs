@@ -2,6 +2,7 @@ use super::Model;
 use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
+use crate::model::Location;
 use crate::model::Line;
 use sdl2::rect::{Point, Rect};
 use crate::model::Car;
@@ -26,15 +27,11 @@ impl View {
         for marking in &model.road_marking {
             self.draw_line(&marking);
         }
-        for car in &model.cars {
-            car.draw(&mut self.canvas);
-        }
-
 
         //init textures  
         let field_width = (SCREEN_WIDTH/2 - CAR_SIZE - MARGIN) as u32;
         let field_heigth = (SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN) as u32;
-        let url = "assets/images/top_left.png";
+        let url = "assets/images/corner.png";
         let texture_creator = self.canvas.texture_creator();        
         match texture_creator.load_texture(url) {
             Ok(texture) => {
@@ -86,6 +83,10 @@ impl View {
             lights.draw(&mut self.canvas);
         }
 
+        for car in &model.cars {
+            car.draw(&mut self.canvas);
+        }
+
 
         self.canvas.present();
     }
@@ -104,14 +105,61 @@ impl View {
 
 impl Drawable for Car {
     fn draw(&self, canvas: &mut Canvas<Window>) {
-        let (r, g, b) = self.color;
-        canvas.set_draw_color(Color::RGB(r, g, b));
+
+
         let x = self.position.x;
         let y = self.position.y;
-        let width = self.size.width as u32;
-        let length = self.size.length as u32;
-        let rect = Rect::new(x, y, width, length);
-        canvas.fill_rect(rect).unwrap();
+
+        //draw image
+        // let url = match  self.destination{
+        //    Destination::Left => "assets/images/blue.png",
+        //    Destination::Right => "assets/images/orange.png",
+        //    _ => "assets/images/white.png"
+        // };
+        //
+        let texture_creator = canvas.texture_creator(); 
+       
+       //calculate angle
+        let angle = match self.direction {
+            Location::South => 180.0,
+            Location::East => 90.0,
+            Location::North => 0.0,
+            Location::West => 270.0,            
+        };
+          
+        match texture_creator.load_texture(self.color.url.clone()) {
+            Ok(texture) => {
+                let query = texture.query();
+                let src = Rect::new(0, 0, query.width, query.height);
+                let dst = Rect::new(x, y , query.width, query.height);
+                let center = Point::new(CAR_SIZE/2, CAR_SIZE/2);
+                if let Err(e) = canvas
+                    .copy_ex(&texture, src, dst, angle, center, false, false) {
+                        println!("Cannot copy texture: {:?}", e);
+                        let (r, g, b) = self.color.color;
+                        canvas.set_draw_color(Color::RGB(r, g, b));
+                        let width = self.size.width as u32;
+                        let length = self.size.length as u32;
+                        let rect = Rect::new(x, y, width, length);
+                        if let Err(e) = canvas.fill_rect(rect){
+                            println!("Could not draw on canvas: {:?}", e);
+                        }
+                    }
+            }, 
+            Err(e) => {
+                println!("Could not loat texture: {:?}", e);
+                let (r, g, b) = self.color.color;
+                canvas.set_draw_color(Color::RGB(r, g, b));
+                let width = self.size.width as u32;
+                let length = self.size.length as u32;
+                let rect = Rect::new(x, y, width, length);
+                if let Err(e) = canvas.fill_rect(rect){
+                    println!("Could not draw on canvas: {:?}", e);
+                }
+            }
+        };
+
+
     }
 }
 

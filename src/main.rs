@@ -9,6 +9,10 @@ use controller::Controller;
 use model::Model;
 use view::*;
 
+//Memo
+// Ahead - white
+// Left - blue
+// Right - orange
 
 fn main() {
     let sdl_context = sdl2::init().unwrap();

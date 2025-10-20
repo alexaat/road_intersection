@@ -7,9 +7,6 @@ const BREAK_POINT_WEST: i32 = SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_EAST: i32 = SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN;
 const BREAK_POINT_NORTH: i32 = SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN;
 const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
-const CAR_COLOR_LEFT: (u8, u8, u8) = (0, 255, 255);
-const CAR_COLOR_AHEAD: (u8, u8, u8) = (0, 0, 255);
-const CAR_COLOR_RIGHT: (u8, u8, u8) = (255, 255, 0);
 const TRAFFIC_LIGHTS_WIDTH: i32 = 18;
 const TRAFFIC_LIGHTS_HEIGTH: i32 = 18;
 
@@ -282,7 +279,7 @@ impl Model {
 pub struct Car {
     pub position: Point,
     pub size: Dimen,
-    pub color: (u8, u8, u8),
+    pub color: ColorOrUrl,
     pub destination: Destination,
     pub direction: Location,
 }
@@ -290,10 +287,10 @@ impl Car{
     pub fn new(location: Location, destination: Destination) -> Self {
         let position = Car::calculate_initial_position(&location);
         let dimen = Dimen::new(CAR_SIZE, CAR_SIZE);
-        let (r, g, b) = match destination {
-            Destination::Ahead => CAR_COLOR_AHEAD,
-            Destination::Right => CAR_COLOR_RIGHT,
-            Destination::Left => CAR_COLOR_LEFT,
+        let color_or_url = match destination {
+            Destination::Ahead => ColorOrUrl{color: CAR_COLOR_WHITE, url: String::from(WHITE_CAR_URL)},
+            Destination::Right => ColorOrUrl { color: CAR_COLOR_ORANGE, url: String::from(ORANGE_CAR_URL)},
+            Destination::Left => ColorOrUrl { color: CAR_COLOR_BLUE, url: String::from(BLUE_CAR_URL)},
         };
         let direction = match location {
             Location::East => Location::West,
@@ -304,7 +301,7 @@ impl Car{
         Self {
             position,
             size: dimen,
-            color: (r, g, b),
+            color: color_or_url,
             destination,
             direction,
         }
@@ -576,4 +573,10 @@ impl TrafficLightSwitch{
             }
         }
     }
+}
+
+#[derive(Clone, Debug)]
+pub struct ColorOrUrl{
+    pub color: (u8, u8, u8),
+    pub url: String
 }
