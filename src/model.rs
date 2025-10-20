@@ -1,3 +1,5 @@
+use rand::Rng;
+
 const CAR_SIZE: i32 = 24;
 const SCREEN_WIDTH: i32 = 800;
 const SCREEN_HEIGHT: i32 = 600;
@@ -23,6 +25,10 @@ impl Model {
             road_marking,
 
         }
+    }
+
+    pub fn spawn_car(&mut self, location: Location, destination: Destination) {
+        println!("spawned: {:?}, {:?}", location, destination);
     }
 
     pub fn create_road_markings() -> Vec<Line> {
@@ -268,12 +274,36 @@ pub enum Location {
     East,
     West,
 }
-#[derive(Clone)]
+impl Location {
+    pub fn get_random() -> Location {
+        let r = rand::rng().random_range(0..4);
+        match r {
+            0 => Location::West,
+            1 => Location::East,
+            2 => Location::North,
+            _ => Location::South,
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
 pub enum Destination {
     Ahead,
     Left,
     Right,
 }
+
+impl Destination {
+    pub fn get_random() -> Destination {
+        let r = rand::rng().random_range(0..3);
+        match r {
+            0 => Destination::Left,
+            1 => Destination::Right,
+            _ => Destination::Ahead,
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct Line {
     pub start: Point,

@@ -1,3 +1,4 @@
+use crate::model::{Destination, Location};
 use crate::Model;
 use crate::View;
 use sdl2::event::Event;
@@ -18,30 +19,32 @@ impl Controller {
         self.view.draw_model(&mut self.model);
     }
 
-        pub fn key_down(&mut self, event: Event) {
+    pub fn key_down(&mut self, event: Event) {
         match event {
             Event::KeyDown {
                 keycode: Some(Keycode::DOWN),
                 ..
-            } => println!("DOWN"),
+            } => self.model.spawn_car(Location::North, Destination::get_random()),
             Event::KeyDown {
                 keycode: Some(Keycode::UP),
                 ..
-            } =>  println!("UP"),
+            } =>   self.model.spawn_car(Location::South, Destination::get_random()),
             Event::KeyDown {
                 keycode: Some(Keycode::LEFT),
                 ..
-            } => println!("LEFT"),
+            } => self.model.spawn_car(Location::East, Destination::get_random()),
             Event::KeyDown {
                 keycode: Some(Keycode::RIGHT),
                 ..
-            } => println!("RIGHT"),
+            } =>  self.model.spawn_car(Location::West, Destination::get_random()),
             Event::KeyDown {
                 keycode: Some(Keycode::R),
                 ..
-            } =>  println!("RANDOM"),
+            } =>  self.model.spawn_car(Location::get_random(), Destination::get_random()),
             _ => {}
         }
     }
+
+
 
 }
