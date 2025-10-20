@@ -3,7 +3,9 @@ use sdl2::pixels::Color;
 use sdl2::render::Canvas;
 use sdl2::video::Window;
 use crate::model::Line;
-use sdl2::rect::{Point};
+use sdl2::rect::{Point, Rect};
+use crate::model::Car;
+
 
 
 pub struct View {
@@ -23,10 +25,13 @@ impl View {
         for marking in &model.road_marking {
             self.draw_line(&marking);
         }
+        for car in &model.cars {
+            car.draw(&mut self.canvas);
+        }
         self.canvas.present();
     }
 
-    pub fn draw_line(&mut self, line: &Line) {
+    fn draw_line(&mut self, line: &Line) {
         let (r, g, b) = line.color;
         self.canvas.set_draw_color(Color::RGB(r, g, b));
         let start = Point::new(line.start.x, line.start.y);
@@ -35,4 +40,22 @@ impl View {
     }
 
 
+}
+
+
+impl Drawable for Car {
+    fn draw(&self, canvas: &mut Canvas<Window>) {
+        let (r, g, b) = self.color;
+        canvas.set_draw_color(Color::RGB(r, g, b));
+        let x = self.position.x;
+        let y = self.position.y;
+        let width = self.size.width as u32;
+        let length = self.size.length as u32;
+        let rect = Rect::new(x, y, width, length);
+        canvas.fill_rect(rect).unwrap();
+    }
+}
+
+trait Drawable {
+    fn draw(&self, canvas: &mut Canvas<Window>);
 }
