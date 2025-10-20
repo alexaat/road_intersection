@@ -32,7 +32,7 @@ fn main() {
                     keycode: Some(Keycode::Escape),
                     ..
                 } => break 'running,
-                _ => {},
+                _ => controller.key_down(event),
             }
         }
         controller.tick();       
