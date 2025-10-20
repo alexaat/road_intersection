@@ -32,7 +32,8 @@ impl View {
         let field_width = (SCREEN_WIDTH/2 - CAR_SIZE - MARGIN) as u32;
         let field_heigth = (SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN) as u32;
         let url = "assets/images/corner.png";
-        let texture_creator = self.canvas.texture_creator();        
+        let texture_creator = self.canvas.texture_creator();
+        let center = Point::new((field_width / 2) as i32, (field_heigth / 2) as i32);        
         match texture_creator.load_texture(url) {
             Ok(texture) => {
                 let query = texture.query();
@@ -40,7 +41,6 @@ impl View {
         
                 //draw background top-left
                 let dst = Rect::new(0, 0, field_width, field_heigth);
-                let center = Point::new((field_width / 2) as i32, (field_heigth / 2) as i32);
                 if let Err(e) = self.canvas
                     .copy_ex(&texture, src, dst, 0.0, center, false, false) {
                         println!("Cannot copy texture: {:?}", e)
@@ -49,7 +49,6 @@ impl View {
                 //draw background top-right
                 let x = field_width as i32 + CAR_SIZE * 2 + MARGIN * 2;
                 let dst = Rect::new(x, 0, field_width, field_heigth);
-                let center = Point::new(x + (field_width / 2) as i32, (field_heigth / 2) as i32);
                 if let Err(e) = self.canvas
                     .copy_ex(&texture, src, dst, 0.0, center, true, false){
                         println!("Cannot copy texture: {:?}", e)
@@ -58,7 +57,6 @@ impl View {
                 //draw background bottom-left
                 let y = field_heigth as i32 + CAR_SIZE * 2 + MARGIN * 2;
                 let dst = Rect::new(0, y, field_width, field_heigth);
-                let center = Point::new((field_width / 2) as i32,  y + (field_heigth / 2) as i32);
                 if let Err(e) = self.canvas
                     .copy_ex(&texture, src, dst, 0.0, center, false, true){
                         println!("Cannot copy texture: {:?}", e)
@@ -66,7 +64,6 @@ impl View {
 
                 //draw background bottom-right
                 let dst = Rect::new(x, y, field_width, field_heigth);
-                let center = Point::new(x + (field_width / 2) as i32,  y + (field_heigth / 2) as i32);
                 if let Err(e) = self.canvas
                     .copy_ex(&texture, src, dst, 0.0, center, true, true){
                         println!("Cannot copy texture: {:?}", e)
@@ -74,8 +71,7 @@ impl View {
 
             },
             Err(e) => println!("Cannot load texture: {:?}", e)
-        }      
-  
+        } 
 
         //draw traffic lights
         model.traffic_light_switch.update(model.cars.clone());
@@ -86,7 +82,6 @@ impl View {
         for car in &model.cars {
             car.draw(&mut self.canvas);
         }
-
 
         self.canvas.present();
     }
@@ -99,24 +94,13 @@ impl View {
         self.canvas.draw_line(start, end).unwrap();
     }
 
-
 }
-
 
 impl Drawable for Car {
     fn draw(&self, canvas: &mut Canvas<Window>) {
 
-
         let x = self.position.x;
         let y = self.position.y;
-
-        //draw image
-        // let url = match  self.destination{
-        //    Destination::Left => "assets/images/blue.png",
-        //    Destination::Right => "assets/images/orange.png",
-        //    _ => "assets/images/white.png"
-        // };
-        //
         let texture_creator = canvas.texture_creator(); 
        
        //calculate angle
@@ -159,21 +143,66 @@ impl Drawable for Car {
             }
         };
 
-
     }
 }
 
 impl Drawable for TrafficLight {
     fn draw(&self, canvas: &mut Canvas<Window>) {
-        let (r, g, b) = match self.status {
-            true => (0, 255, 0),
-            false => (255, 0, 0),
+        
+        let url = match self.status {
+            true => GO_SIGN_URL,
+            false => STOP_SIGN_URL
         };
-        canvas.set_draw_color(Color::RGB(r, g, b));
-        let width = self.size.width as u32;
-        let length = self.size.length as u32;
-        let rect = Rect::new(self.position.x, self.position.y, width, length);
-        canvas.fill_rect(rect).unwrap();
+
+        let texture_creator = canvas.texture_creator();   
+        match texture_creator.load_texture(url){
+            Ok(texture) => {
+                let query = texture.query();
+                let src = Rect::new(0, 0, query.width, query.height);
+                let dst = Rect::new(self.position.x, self.position.y, query.width, query.height);
+                let center = Point::new((query.width / 2) as i32, (query.height / 2) as i32);
+                
+                
+                if let Err(e) = canvas
+                    .copy_ex(&texture, src, dst, 180.0, center, true, true){
+                        println!("Cannot copy texture: {:?}", e);
+                        let (r, g, b) = match self.status {
+                            true => (0, 255, 0),
+                            false => (255, 0, 0),
+                        };
+                        canvas.set_draw_color(Color::RGB(r, g, b));
+                        let width = self.size.width as u32;
+                        let length = self.size.length as u32;
+                        let rect = Rect::new(self.position.x, self.position.y, width, length);
+                        if let Err(e) = canvas.fill_rect(rect){
+                            println!("Could not draw on canvas: {:?}", e);
+                        }
+
+
+
+                    }
+
+            },
+            Err(e) => {
+                println!("Could not load texture: {:?}", e);
+                let (r, g, b) = match self.status {
+                    true => (0, 255, 0),
+                    false => (255, 0, 0),
+                };
+                canvas.set_draw_color(Color::RGB(r, g, b));
+                let width = self.size.width as u32;
+                let length = self.size.length as u32;
+                let rect = Rect::new(self.position.x, self.position.y, width, length);
+                if let Err(e) = canvas.fill_rect(rect){
+                    println!("Could not draw on canvas: {:?}", e);
+                }
+            }
+        };
+
+
+        
+        
+
     }
 }
 
