@@ -3,6 +3,9 @@ use crate::Model;
 use crate::View;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
+const CAR_SIZE: i32 = 24;
+const SCREEN_WIDTH: i32 = 800;
+const SCREEN_HEIGHT: i32 = 600;
 
 
 pub struct Controller {
@@ -16,7 +19,36 @@ impl Controller {
     }
 
     pub fn tick(&mut self) {
+        let all_cars = self.model.cars.clone();
+        for car in &mut self.model.cars {           
+            car.drive(&all_cars);
+        }
+        //remove from list cars that are no longer on the screen
+        self.remove_old_cars();
+
         self.view.draw_model(&mut self.model);
+    }
+
+    fn remove_old_cars(&mut self) {
+        let clonned = self.model.cars.clone();
+        for (index, car) in clonned.iter().enumerate() {
+            if car.direction == Location::East && car.position.x > SCREEN_WIDTH {
+                self.model.cars.remove(index);
+                break;
+            }
+            if car.direction == Location::West && car.position.x < -CAR_SIZE {
+                self.model.cars.remove(index);
+                break;
+            }
+            if car.direction == Location::South && car.position.y > SCREEN_HEIGHT {
+                self.model.cars.remove(index);
+                break;
+            }
+            if car.direction == Location::North && car.position.y < -CAR_SIZE {
+                self.model.cars.remove(index);
+                break;
+            }
+        }
     }
 
     pub fn key_down(&mut self, event: Event) {

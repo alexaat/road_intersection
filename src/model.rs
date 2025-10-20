@@ -76,6 +76,65 @@ impl Model {
         false
     }
 
+    //turn car at crossroads
+    pub fn update_direction(car: &mut Car) {
+        match car.destination {
+            Destination::Left => match car.direction {
+                Location::West => {
+                    if car.position.x <= (SCREEN_WIDTH + MARGIN) / 2 {
+                        car.direction = Location::South;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::East => {
+                    if car.position.x >= SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN / 2 {
+                        car.direction = Location::North;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::North => {
+                    if car.position.y <= (SCREEN_HEIGHT + MARGIN) / 2 {
+                        car.direction = Location::West;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::South => {
+                    if car.position.y >= SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN / 2 {
+                        car.direction = Location::East;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+            },
+            Destination::Right => match car.direction {
+                Location::West => {
+                    if car.position.x <= SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN / 2 {
+                        car.direction = Location::North;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::East => {
+                    if car.position.x >= (SCREEN_WIDTH + MARGIN) / 2 {
+                        car.direction = Location::South;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::North => {
+                    if car.position.y <= SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN / 2 {
+                        car.direction = Location::East;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+                Location::South => {
+                    if car.position.y >= (SCREEN_HEIGHT + MARGIN) / 2 {
+                        car.direction = Location::West;
+                        car.destination = Destination::Ahead;
+                    }
+                }
+            },
+            _ => {}
+        }
+    }
+
     pub fn create_road_markings() -> Vec<Line> {
         let mut lines = vec![];
         //Top1
@@ -280,7 +339,7 @@ impl Model {
 
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Car {
     pub position: Point,
     pub size: Dimen,
@@ -311,8 +370,6 @@ impl Car{
             direction,
         }
     }
-
-
     pub fn calculate_initial_position(location: &Location) -> Point {
         let position = match location {
             Location::West => Point::new(MARGIN, (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2),
@@ -328,6 +385,61 @@ impl Car{
         };
         position
     }
+    pub fn drive(&mut self, cars: &Vec<Car>) {
+        //check separation distance
+        //West Side
+        if self.direction == Location::East {
+            let max_x = self.position.x + CAR_SIZE + SEPARATION_DISTANCE;
+            for c in cars {
+                if c.direction == Location::East && c.position.x == max_x {
+                    return;
+                }
+            }
+        }
+        //East Side
+        if self.direction == Location::West {
+            let max_x = self.position.x - CAR_SIZE - SEPARATION_DISTANCE;
+            for c in cars {
+                if c.direction == Location::West && c.position.x == max_x {
+                    return;
+                }
+            }
+        }
+        //North Side
+        if self.direction == Location::South {
+            let max_y = self.position.y + CAR_SIZE + SEPARATION_DISTANCE;
+            for c in cars {
+                if c.direction == Location::South && c.position.y == max_y {
+                    return;
+                }
+            }
+        }
+        //South Side
+        if self.direction == Location::North {
+            let max_y = self.position.y - CAR_SIZE - SEPARATION_DISTANCE;
+            for c in cars {
+                if c.direction == Location::North && c.position.y == max_y {
+                    return;
+                }
+            }
+        }
+        match self.direction {
+            Location::East => {
+                self.position.x += 1;
+            }
+            Location::West => {
+                self.position.x -= 1;
+            }
+            Location::North => {
+                self.position.y -= 1;
+            }
+            Location::South => {
+                self.position.y += 1;
+            }
+        }
+        Model::update_direction(self);
+    }
+
 }
 
 
@@ -343,7 +455,7 @@ impl Point {
 }
 
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Dimen {
     pub width: i32,
     pub length: i32,
