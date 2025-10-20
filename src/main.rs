@@ -17,7 +17,7 @@ fn main() {
         .position_centered()
         .build()
         .unwrap();
-    let mut canvas = window.into_canvas().build().unwrap();
+    let canvas = window.into_canvas().build().unwrap();
     
     let view = View::new(canvas, (0, 0, 0));
     let model = Model::new();

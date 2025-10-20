@@ -346,6 +346,37 @@ impl Model {
         lines
     }
 
+    pub fn is_crossing_clear(cars: Vec<Car>) -> bool {
+        let p1 = Point::new(
+            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
+            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
+        );
+        let p2 = Point::new(
+            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
+            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
+        );
+        for car in &cars {
+            let tl = Point::new(car.position.x, car.position.y);
+            let tr = Point::new(car.position.x + CAR_SIZE, car.position.y);
+            let bl = Point::new(car.position.x, car.position.y + CAR_SIZE);
+            let br = Point::new(car.position.x + CAR_SIZE, car.position.y + CAR_SIZE);
+            if tl.x > p1.x && tl.x < p2.x && tl.y > p1.y && tl.y < p2.y {
+                return false;
+            }
+            if bl.x > p1.x && bl.x < p2.x && bl.y > p1.y && bl.y < p2.y {
+                return false;
+            }
+            if tr.x > p1.x && tr.x < p2.x && tr.y > p1.y && tr.y < p2.y {
+                return false;
+            }
+            if br.x > p1.x && br.x < p2.x && br.y > p1.y && br.y < p2.y {
+                return false;
+            }
+        }
+        true
+    }
+
+
 }
 
 #[derive(Clone, Debug)]
@@ -602,5 +633,48 @@ impl TrafficLightSwitch{
             )),
         );
         lights
+    }
+
+    pub fn request(&mut self, location: Location) {
+        self.request = Some(location);
+    }
+    pub fn urgent_request(&mut self, location: Location) {
+        self.traffic_lights
+            .entry(Location::West)
+            .and_modify(|v| v.status = false);
+        self.traffic_lights
+            .entry(Location::East)
+            .and_modify(|v| v.status = false);
+        self.traffic_lights
+            .entry(Location::North)
+            .and_modify(|v| v.status = false);
+        self.traffic_lights
+            .entry(Location::South)
+            .and_modify(|v| v.status = false);
+        self.request = Some(location);
+    }
+    pub fn update(&mut self, cars: Vec<Car>) {
+        if let Some(location) = &self.request {
+            if !self.traffic_lights[&location].status {
+                if Model::is_crossing_clear(cars) {
+                    self.traffic_lights
+                        .entry(Location::West)
+                        .and_modify(|v| v.status = false);
+                    self.traffic_lights
+                        .entry(Location::East)
+                        .and_modify(|v| v.status = false);
+                    self.traffic_lights
+                        .entry(Location::North)
+                        .and_modify(|v| v.status = false);
+                    self.traffic_lights
+                        .entry(Location::South)
+                        .and_modify(|v| v.status = false);
+                    self.traffic_lights
+                        .entry(location.clone())
+                        .and_modify(|v| v.status = true);
+                    self.request = None;
+                }
+            }
+        }
     }
 }

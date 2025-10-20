@@ -29,7 +29,7 @@ impl View {
         for car in &model.cars {
             car.draw(&mut self.canvas);
         }
-        
+        model.traffic_light_switch.update(model.cars.clone());
         for lights in model.traffic_light_switch.traffic_lights.values() {
             lights.draw(&mut self.canvas);
         }
