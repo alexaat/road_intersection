@@ -5,6 +5,7 @@ use sdl2::video::Window;
 use crate::model::Line;
 use sdl2::rect::{Point, Rect};
 use crate::model::Car;
+use crate::model::TrafficLight;
 
 
 
@@ -27,6 +28,10 @@ impl View {
         }
         for car in &model.cars {
             car.draw(&mut self.canvas);
+        }
+        
+        for lights in model.traffic_light_switch.traffic_lights.values() {
+            lights.draw(&mut self.canvas);
         }
         self.canvas.present();
     }
@@ -52,6 +57,20 @@ impl Drawable for Car {
         let width = self.size.width as u32;
         let length = self.size.length as u32;
         let rect = Rect::new(x, y, width, length);
+        canvas.fill_rect(rect).unwrap();
+    }
+}
+
+impl Drawable for TrafficLight {
+    fn draw(&self, canvas: &mut Canvas<Window>) {
+        let (r, g, b) = match self.status {
+            true => (0, 255, 0),
+            false => (255, 0, 0),
+        };
+        canvas.set_draw_color(Color::RGB(r, g, b));
+        let width = self.size.width as u32;
+        let length = self.size.length as u32;
+        let rect = Rect::new(self.position.x, self.position.y, width, length);
         canvas.fill_rect(rect).unwrap();
     }
 }

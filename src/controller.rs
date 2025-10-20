@@ -21,7 +21,7 @@ impl Controller {
     pub fn tick(&mut self) {
         let all_cars = self.model.cars.clone();
         for car in &mut self.model.cars {           
-            car.drive(&all_cars);
+            car.drive(&all_cars, &self.model.traffic_light_switch.traffic_lights);
         }
         //remove from list cars that are no longer on the screen
         self.remove_old_cars();

@@ -1,4 +1,5 @@
 use rand::Rng;
+use std::collections::HashMap;
 
 const CAR_SIZE: i32 = 24;
 const SCREEN_WIDTH: i32 = 800;
@@ -14,20 +15,28 @@ const SEPARATION_DISTANCE: i32 = 24;
 const CAR_COLOR_LEFT: (u8, u8, u8) = (0, 255, 255);
 const CAR_COLOR_AHEAD: (u8, u8, u8) = (0, 0, 255);
 const CAR_COLOR_RIGHT: (u8, u8, u8) = (255, 255, 0);
+const TRAFFIC_LIGHTS_WIDTH: i32 = 18;
+const TRAFFIC_LIGHTS_HEIGTH: i32 = 18;
 
 pub struct Model {
     pub cars: Vec<Car>,
-    pub road_marking: Vec<Line>
+    pub road_marking: Vec<Line>,
+    pub traffic_light_switch: TrafficLightSwitch,
 }
 
 impl Model {
     pub fn new() -> Self {
         let cars = vec![];
-        let road_marking = Model::create_road_markings();     
+        let road_marking = Model::create_road_markings();
+        let traffic_lights = TrafficLightSwitch::create_traffic_lights();
+        let traffic_light_switch = TrafficLightSwitch {
+            traffic_lights,
+            request: None,
+        };     
         Self {
             cars,
             road_marking,
-
+            traffic_light_switch
         }
     }
 
@@ -385,7 +394,7 @@ impl Car{
         };
         position
     }
-    pub fn drive(&mut self, cars: &Vec<Car>) {
+    pub fn drive(&mut self, cars: &Vec<Car>, traffic_lights: &HashMap<Location, TrafficLight>) {
         //check separation distance
         //West Side
         if self.direction == Location::East {
@@ -423,6 +432,37 @@ impl Car{
                 }
             }
         }
+
+                //check traffic light
+        //West Side
+        if self.position.x == SCREEN_WIDTH / 2 - CAR_SIZE * 2 - MARGIN
+            && self.direction == Location::East
+            && traffic_lights[&Location::West].status == false
+        {
+            return;
+        }
+        //East Side
+        if self.position.x == SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN
+            && self.direction == Location::West
+            && traffic_lights[&Location::East].status == false
+        {
+            return;
+        }
+        //South side
+        if self.position.y == SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN
+            && self.direction == Location::North
+            && traffic_lights[&Location::South].status == false
+        {
+            return;
+        }
+        //North side
+        if self.position.y == SCREEN_HEIGHT / 2 - CAR_SIZE * 2 - MARGIN
+            && self.direction == Location::South
+            && traffic_lights[&Location::North].status == false
+        {
+            return;
+        }
+
         match self.direction {
             Location::East => {
                 self.position.x += 1;
@@ -508,4 +548,59 @@ pub struct Line {
     pub start: Point,
     pub end: Point,
     pub color: (u8, u8, u8),
+}
+
+pub struct TrafficLight {
+    pub position: Point,
+    pub size: Dimen,
+    pub status: bool,
+}
+impl TrafficLight {
+    pub fn new(position: Point) -> Self {
+        TrafficLight {
+            position,
+            size: Dimen::new(TRAFFIC_LIGHTS_WIDTH, TRAFFIC_LIGHTS_HEIGTH),
+            status: false,
+        }
+    }
+}
+
+pub struct TrafficLightSwitch {
+    pub request: Option<Location>,
+    pub traffic_lights: HashMap<Location, TrafficLight>,
+}
+
+impl TrafficLightSwitch{
+    pub fn create_traffic_lights() -> HashMap<Location, TrafficLight> {
+        let mut lights = HashMap::new();
+        lights.insert(
+            Location::West,
+            TrafficLight::new(Point::new(
+                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+            )),
+        );
+        lights.insert(
+            Location::North,
+            TrafficLight::new(Point::new(
+                (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+            )),
+        );
+        lights.insert(
+            Location::South,
+            TrafficLight::new(Point::new(
+                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+            )),
+        );
+        lights.insert(
+            Location::East,
+            TrafficLight::new(Point::new(
+                (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+            )),
+        );
+        lights
+    }
 }
