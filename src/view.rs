@@ -154,34 +154,64 @@ impl Drawable for TrafficLight {
             false => STOP_SIGN_URL
         };
 
+        let angle = match self.location{
+            Location::East => 90.0,
+            Location::West => 270.0,
+            Location::North => 0.0,
+            Location::South => 180.0
+        };
+
         let texture_creator = canvas.texture_creator();   
         match texture_creator.load_texture(url){
             Ok(texture) => {
                 let query = texture.query();
                 let src = Rect::new(0, 0, query.width, query.height);
-                let dst = Rect::new(self.position.x, self.position.y, query.width, query.height);
-                let center = Point::new((query.width / 2) as i32, (query.height / 2) as i32);
-                
+
+                let sign_position = match self.location{
+                    Location::East => Point::new(SCREEN_WIDTH/2 + CAR_SIZE + MARGIN * 2, SCREEN_HEIGHT/2 + CAR_SIZE + MARGIN * 2),
+                    Location::West => Point::new(SCREEN_WIDTH/2 - CAR_SIZE - MARGIN * 2 - query.width as i32, SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN * 2 - query.height as i32),
+                    Location::North => Point::new(SCREEN_WIDTH/2 + CAR_SIZE + MARGIN * 2, SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN * 2 - query.height as i32),
+                    Location::South => Point::new(SCREEN_WIDTH/2 - CAR_SIZE - MARGIN * 2 - query.width as i32, SCREEN_HEIGHT/2 + CAR_SIZE + MARGIN * 2)
+                };
+
+                let dst = Rect::new(sign_position.x, sign_position.y, query.width, query.height);
+                let center = Point::new((query.width / 2) as i32, (query.height / 2) as i32);               
                 
                 if let Err(e) = canvas
-                    .copy_ex(&texture, src, dst, 180.0, center, true, true){
+                    .copy_ex(&texture, src, dst, angle, center, true, true){
                         println!("Cannot copy texture: {:?}", e);
                         let (r, g, b) = match self.status {
                             true => (0, 255, 0),
                             false => (255, 0, 0),
                         };
+
+                        let traffic_light_position = match self.location{
+                            Location::East => Point::new(
+                            (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                            (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                            ),
+                            Location::West => Point::new(
+                            (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                            (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+                            ),
+                            Location::North => Point::new(
+                            (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                            (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+                            ),
+                            Location::South => Point::new(
+                            (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                            (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                            ),
+                        };
+
                         canvas.set_draw_color(Color::RGB(r, g, b));
                         let width = self.size.width as u32;
                         let length = self.size.length as u32;
-                        let rect = Rect::new(self.position.x, self.position.y, width, length);
+                        let rect = Rect::new(traffic_light_position.x, traffic_light_position.y, width, length);
                         if let Err(e) = canvas.fill_rect(rect){
                             println!("Could not draw on canvas: {:?}", e);
                         }
-
-
-
                     }
-
             },
             Err(e) => {
                 println!("Could not load texture: {:?}", e);
@@ -189,21 +219,38 @@ impl Drawable for TrafficLight {
                     true => (0, 255, 0),
                     false => (255, 0, 0),
                 };
+
+                let traffic_light_position = match self.location{
+                    Location::East => Point::new(
+                    (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                    (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                    ),
+                    Location::West => Point::new(
+                    (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                    (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+                    ),
+                    Location::North => Point::new(
+                    (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                    (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
+                    ),
+                    Location::South => Point::new(
+                    (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
+                    (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
+                    ),
+                };
+
                 canvas.set_draw_color(Color::RGB(r, g, b));
                 let width = self.size.width as u32;
                 let length = self.size.length as u32;
-                let rect = Rect::new(self.position.x, self.position.y, width, length);
+                let rect = Rect::new(traffic_light_position.x, traffic_light_position.y, width, length);
                 if let Err(e) = canvas.fill_rect(rect){
                     println!("Could not draw on canvas: {:?}", e);
                 }
             }
-        };
-
-
-        
-        
+        };       
 
     }
+
 }
 
 trait Drawable {

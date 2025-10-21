@@ -477,18 +477,22 @@ pub struct Line {
 }
 
 pub struct TrafficLight {
-    pub position: Point,
+    pub location: Location,
+    //pub position: Point,
     pub size: Dimen,
     pub status: bool,
 }
 impl TrafficLight {
-    pub fn new(position: Point) -> Self {
+    pub fn new(/*position: Point,*/ location: Location) -> Self {
         TrafficLight {
-            position,
+            location,
+            //position,
             size: Dimen::new(TRAFFIC_LIGHTS_WIDTH, TRAFFIC_LIGHTS_HEIGTH),
             status: false,
         }
     }
+
+
 }
 
 pub struct TrafficLightSwitch {
@@ -500,32 +504,20 @@ impl TrafficLightSwitch{
     pub fn create_traffic_lights() -> HashMap<Location, TrafficLight> {
         let mut lights = HashMap::new();
         lights.insert(
-            Location::West,
-            TrafficLight::new(Point::new(
-                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
-                (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
-            )),
+            Location::West,            
+            TrafficLight::new(Location::West),
         );
         lights.insert(
             Location::North,
-            TrafficLight::new(Point::new(
-                (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
-                (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_HEIGTH,
-            )),
+            TrafficLight::new(Location::North),
         );
         lights.insert(
             Location::South,
-            TrafficLight::new(Point::new(
-                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2 - MARGIN - TRAFFIC_LIGHTS_WIDTH,
-                (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
-            )),
+            TrafficLight::new(Location::South),
         );
         lights.insert(
             Location::East,
-            TrafficLight::new(Point::new(
-                (SCREEN_WIDTH + MARGIN) / 2 + CAR_SIZE + MARGIN,
-                (SCREEN_HEIGHT + MARGIN) / 2 + CAR_SIZE + MARGIN,
-            )),
+            TrafficLight::new(Location::East),
         );
         lights
     }
