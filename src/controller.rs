@@ -1,19 +1,9 @@
+use crate::constants::*;
 use crate::model::{Destination, Location};
 use crate::Model;
 use crate::View;
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
-const CAR_SIZE: i32 = 24;
-const SCREEN_WIDTH: i32 = 800;
-const SCREEN_HEIGHT: i32 = 600;
-const MARGIN: i32 = 8;
-const BREAK_POINT_WEST: i32 = SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN;
-const BREAK_POINT_EAST: i32 = SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN;
-const BREAK_POINT_NORTH: i32 = SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN;
-const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
-const MAX_CARS_IN_QUEUE: i32 = 7;
-
-
 
 pub struct Controller {
     model: Model,
@@ -41,19 +31,19 @@ impl Controller {
     fn remove_old_cars(&mut self) {
         let clonned = self.model.cars.clone();
         for (index, car) in clonned.iter().enumerate() {
-            if car.direction == Location::East && car.position.x > SCREEN_WIDTH {
+            if car.direction == Location::East && car.position.x  > SCREEN_WIDTH_F64 {
                 self.model.cars.remove(index);
                 break;
             }
-            if car.direction == Location::West && car.position.x < -CAR_SIZE {
+            if car.direction == Location::West && car.position.x < -CAR_SIZE_F64 {
                 self.model.cars.remove(index);
                 break;
             }
-            if car.direction == Location::South && car.position.y > SCREEN_HEIGHT {
+            if car.direction == Location::South && car.position.y > SCREEN_HEIGHT_F64 {
                 self.model.cars.remove(index);
                 break;
             }
-            if car.direction == Location::North && car.position.y < -CAR_SIZE {
+            if car.direction == Location::North && car.position.y < -CAR_SIZE_F64 {
                 self.model.cars.remove(index);
                 break;
             }
@@ -86,24 +76,25 @@ impl Controller {
         }
     }
 
-    pub fn control_traffic(&mut self) {
+
+     pub fn control_traffic(&mut self) {
         //check for queues
         let mut west = (0, Location::West);
         let mut east = (0, Location::East);
         let mut south = (0, Location::South);
         let mut north = (0, Location::North);
         for car in &self.model.cars {
-            if car.direction == Location::East && car.position.x + CAR_SIZE <= BREAK_POINT_WEST {
-                west.0 += 1;
+            if car.direction == Location::East && car.position.x + CAR_SIZE_F64/2.0 <= BREAK_POINT_WEST {
+                west.0 += CAR_SPEED;
             }
-            if car.direction == Location::West && car.position.x >= BREAK_POINT_EAST {
-                east.0 += 1;
+            if car.direction == Location::West && car.position.x >= BREAK_POINT_EAST + CAR_SIZE_F64/2.0 {
+                east.0 += CAR_SPEED;
             }
-            if car.direction == Location::South && car.position.y + CAR_SIZE <= BREAK_POINT_NORTH {
-                north.0 += 1;
+            if car.direction == Location::South && car.position.y + CAR_SIZE_F64/2.0 <= BREAK_POINT_NORTH {
+                north.0 += CAR_SPEED;
             }
-            if car.direction == Location::North && car.position.y >= BREAK_POINT_SOUTH {
-                south.0 += 1;
+            if car.direction == Location::North && car.position.y >= BREAK_POINT_SOUTH + CAR_SIZE_F64/2.0 {
+                south.0 += CAR_SPEED;
             }
         }
 
@@ -126,32 +117,32 @@ impl Controller {
         //Check approach Break Points
         for car in &self.model.cars {
             if car.direction == Location::East
-                && (car.position.x == BREAK_POINT_WEST - CAR_SIZE * 2
-                    || car.position.x == BREAK_POINT_WEST - CAR_SIZE)
+                && (car.position.x == BREAK_POINT_WEST - CAR_SIZE_F64 * 1.5
+                    || car.position.x == BREAK_POINT_WEST - CAR_SIZE_F64/2.0)
             {
                 //Send signal to T/L switch
                 self.model.traffic_light_switch.request(Location::West);
                 break;
             }
             if car.direction == Location::West
-                && (car.position.x == BREAK_POINT_EAST + CAR_SIZE
-                    || car.position.x == BREAK_POINT_EAST)
+                && (car.position.x == BREAK_POINT_EAST + CAR_SIZE_F64*1.5
+                    || car.position.x == BREAK_POINT_EAST + CAR_SIZE_F64/2.0)
             {
                 //Send signal to T/L switch
                 self.model.traffic_light_switch.request(Location::East);
                 break;
             }
             if car.direction == Location::South
-                && (car.position.y == BREAK_POINT_NORTH - CAR_SIZE * 2
-                    || car.position.y == BREAK_POINT_NORTH - CAR_SIZE)
+                && (car.position.y == BREAK_POINT_NORTH - CAR_SIZE_F64 * 1.5
+                    || car.position.y == BREAK_POINT_NORTH - CAR_SIZE_F64/2.0)
             {
                 //Send signal to T/L switch
                 self.model.traffic_light_switch.request(Location::North);
                 break;
             }
             if car.direction == Location::North
-                && (car.position.y == BREAK_POINT_SOUTH + CAR_SIZE
-                    || car.position.y == BREAK_POINT_SOUTH)
+                && (car.position.y == BREAK_POINT_SOUTH + CAR_SIZE_F64*1.5
+                    || car.position.y == BREAK_POINT_SOUTH + CAR_SIZE_F64/2.0)
             {
                 //Send signal to T/L switch
                 self.model.traffic_light_switch.request(Location::South);
@@ -159,5 +150,79 @@ impl Controller {
             }
         }
     }
+
+    // pub fn control_traffic(&mut self) {
+    //     //check for queues
+    //     let mut west = (0, Location::West);
+    //     let mut east = (0, Location::East);
+    //     let mut south = (0, Location::South);
+    //     let mut north = (0, Location::North);
+    //     for car in &self.model.cars {
+    //         if car.direction == Location::East && car.position.x + CAR_SIZE_F64 <= BREAK_POINT_WEST {
+    //             west.0 += CAR_SPEED;
+    //         }
+    //         if car.direction == Location::West && car.position.x >= BREAK_POINT_EAST {
+    //             east.0 += CAR_SPEED;
+    //         }
+    //         if car.direction == Location::South && car.position.y + CAR_SIZE_F64 <= BREAK_POINT_NORTH {
+    //             north.0 += CAR_SPEED;
+    //         }
+    //         if car.direction == Location::North && car.position.y >= BREAK_POINT_SOUTH {
+    //             south.0 += CAR_SPEED;
+    //         }
+    //     }
+
+    //     if west.0 >= MAX_CARS_IN_QUEUE {
+    //         self.model.traffic_light_switch.urgent_request(west.1);
+    //         return;
+    //     }
+    //     if east.0 >= MAX_CARS_IN_QUEUE {
+    //         self.model.traffic_light_switch.urgent_request(east.1);
+    //         return;
+    //     }
+    //     if north.0 >= MAX_CARS_IN_QUEUE {
+    //         self.model.traffic_light_switch.urgent_request(north.1);
+    //         return;
+    //     }
+    //     if south.0 >= MAX_CARS_IN_QUEUE {
+    //         self.model.traffic_light_switch.urgent_request(south.1);
+    //         return;
+    //     }
+    //     //Check approach Break Points
+    //     for car in &self.model.cars {
+    //         if car.direction == Location::East
+    //             && (car.position.x == BREAK_POINT_WEST - CAR_SIZE_F64 * 2.0
+    //                 || car.position.x == BREAK_POINT_WEST - CAR_SIZE_F64)
+    //         {
+    //             //Send signal to T/L switch
+    //             self.model.traffic_light_switch.request(Location::West);
+    //             break;
+    //         }
+    //         if car.direction == Location::West
+    //             && (car.position.x == BREAK_POINT_EAST + CAR_SIZE_F64
+    //                 || car.position.x == BREAK_POINT_EAST)
+    //         {
+    //             //Send signal to T/L switch
+    //             self.model.traffic_light_switch.request(Location::East);
+    //             break;
+    //         }
+    //         if car.direction == Location::South
+    //             && (car.position.y == BREAK_POINT_NORTH - CAR_SIZE_F64 * 2.0
+    //                 || car.position.y == BREAK_POINT_NORTH - CAR_SIZE_F64)
+    //         {
+    //             //Send signal to T/L switch
+    //             self.model.traffic_light_switch.request(Location::North);
+    //             break;
+    //         }
+    //         if car.direction == Location::North
+    //             && (car.position.y == BREAK_POINT_SOUTH + CAR_SIZE_F64
+    //                 || car.position.y == BREAK_POINT_SOUTH)
+    //         {
+    //             //Send signal to T/L switch
+    //             self.model.traffic_light_switch.request(Location::South);
+    //             break;
+    //         }
+    //     }
+    // }
 
 }

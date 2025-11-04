@@ -30,11 +30,10 @@ impl View {
 
         //init textures  
         let field_width = (SCREEN_WIDTH/2 - CAR_SIZE - MARGIN) as u32;
-        let field_heigth = (SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN) as u32;
-        let url = "assets/images/corner.png";
+        let field_heigth = (SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN) as u32;        
         let texture_creator = self.canvas.texture_creator();
         let center = Point::new((field_width / 2) as i32, (field_heigth / 2) as i32);        
-        match texture_creator.load_texture(url) {
+        match texture_creator.load_texture(LANDSCAPE_URL) {
             Ok(texture) => {
                 let query = texture.query();
                 let src = Rect::new(0, 0, query.width, query.height);
@@ -83,6 +82,26 @@ impl View {
             car.draw(&mut self.canvas);
         }
 
+
+        //////////////////// points //////////////////// 
+        self.canvas.set_draw_color(Color::RGB(255, 255, 0));
+        let top_left = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN, SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN);
+        let rect = Rect::new(top_left.x - 2, top_left.y - 2, 4, 4);
+        self.canvas.fill_rect(rect).unwrap();
+
+        let top_right = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN, SCREEN_HEIGHT/2 - CAR_SIZE - MARGIN);
+        let rect = Rect::new(top_right.x - 2, top_right.y - 2, 4, 4);
+        self.canvas.fill_rect(rect).unwrap();
+
+        let bottom_left = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN, SCREEN_HEIGHT/2 + CAR_SIZE + MARGIN);
+        let rect = Rect::new(bottom_left.x - 2, bottom_left.y - 2, 4, 4);
+        self.canvas.fill_rect(rect).unwrap();
+
+        let bottom_right = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN, SCREEN_HEIGHT/2 + CAR_SIZE + MARGIN);
+        let rect = Rect::new(bottom_right.x - 2, bottom_right.y - 2, 4, 4);
+        self.canvas.fill_rect(rect).unwrap();        
+        ///////////////////////////////////////////////
+
         self.canvas.present();
     }
 
@@ -99,32 +118,26 @@ impl View {
 impl Drawable for Car {
     fn draw(&self, canvas: &mut Canvas<Window>) {
 
-        let x = self.position.x;
-        let y = self.position.y;
+        let x = self.position.x as i32;
+        let y = self.position.y as i32;
         let texture_creator = canvas.texture_creator(); 
-       
-       //calculate angle
-        let angle = match self.direction {
-            Location::South => 180.0,
-            Location::East => 90.0,
-            Location::North => 0.0,
-            Location::West => 270.0,            
-        };
-          
+
         match texture_creator.load_texture(self.color.url.clone()) {
             Ok(texture) => {
                 let query = texture.query();
                 let src = Rect::new(0, 0, query.width, query.height);
-                let dst = Rect::new(x, y , query.width, query.height);
+                let dst = Rect::new(x - CAR_SIZE/2, y - CAR_SIZE/2, query.width, query.height);
+                //let dst = Rect::new(x, y , query.width, query.height);
                 let center = Point::new(CAR_SIZE/2, CAR_SIZE/2);
                 if let Err(e) = canvas
-                    .copy_ex(&texture, src, dst, angle, center, false, false) {
+                    .copy_ex(&texture, src, dst, self.deg, center, false, false) {
                         println!("Cannot copy texture: {:?}", e);
                         let (r, g, b) = self.color.color;
                         canvas.set_draw_color(Color::RGB(r, g, b));
                         let width = self.size.width as u32;
                         let length = self.size.length as u32;
-                        let rect = Rect::new(x, y, width, length);
+                        //let rect = Rect::new(x, y, width, length);
+                        let rect = Rect::new(x - CAR_SIZE/2, y - CAR_SIZE/2, width, length);
                         if let Err(e) = canvas.fill_rect(rect){
                             println!("Could not draw on canvas: {:?}", e);
                         }
@@ -136,12 +149,24 @@ impl Drawable for Car {
                 canvas.set_draw_color(Color::RGB(r, g, b));
                 let width = self.size.width as u32;
                 let length = self.size.length as u32;
-                let rect = Rect::new(x, y, width, length);
+                //let rect = Rect::new(x, y, width, length);
+                let rect = Rect::new(x - CAR_SIZE/2, y - CAR_SIZE/2, width, length);
                 if let Err(e) = canvas.fill_rect(rect){
                     println!("Could not draw on canvas: {:?}", e);
                 }
             }
         };
+
+        //draw center car
+        let rect = Rect::new(x - 2, y - 2, 4, 4);
+        canvas.set_draw_color(Color::RGB(255, 0, 0));
+        canvas.fill_rect(rect).unwrap();
+        ////////////
+        //canvas.fill_rect(Rect::new( (SCREEN_WIDTH_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64) as i32 - 4,  (SCREEN_HEIGHT_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64) as i32 - 4, 8, 8)).unwrap();
+        //canvas.fill_rect(Rect::new( (  SCREEN_WIDTH_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64) as i32 - 4,  ( SCREEN_HEIGHT_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64) as i32 - 4, 8, 8)).unwrap();
+
+    
+       
 
     }
 }
@@ -252,7 +277,6 @@ impl Drawable for TrafficLight {
     }
 
 }
-
 trait Drawable {
     fn draw(&self, canvas: &mut Canvas<Window>);
 }

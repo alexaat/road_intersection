@@ -1,18 +1,12 @@
 use rand::Rng;
+use core::f64;
 use std::collections::HashMap;
 use crate::constants::*;
-
-const LINE_COLOR_2: (u8, u8, u8) = (100, 100, 100);
-const BREAK_POINT_WEST: i32 = SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN;
-const BREAK_POINT_EAST: i32 = SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN;
-const BREAK_POINT_NORTH: i32 = SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN;
-const BREAK_POINT_SOUTH: i32 = SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN;
-
 
 pub struct Model {
     pub cars: Vec<Car>,
     pub road_marking: Vec<Line>,
-    pub traffic_light_switch: TrafficLightSwitch,
+    pub traffic_light_switch: TrafficLightSwitch,    
 }
 
 impl Model {
@@ -39,12 +33,12 @@ impl Model {
     }
 
     //check if new car would spawn too close to existing car
-    pub fn is_overlap(cars: &Vec<Car>, intial_position: &Point) -> bool{
+    pub fn is_overlap(cars: &Vec<Car>, intial_position: &PointF) -> bool{
 
         let x1 = intial_position.x;
         let y1 = intial_position.y;
-        let x2 = x1 + CAR_SIZE;
-        let y2 = y1 + CAR_SIZE;
+        let x2 = x1 + CAR_SIZE_F64;
+        let y2 = y1 + CAR_SIZE_F64;
 
         for car in cars {
             if car.position.x >= x1
@@ -55,7 +49,7 @@ impl Model {
             }
 
             if x1 >= car.position.x
-                && x1 <= car.position.x + CAR_SIZE + SEPARATION_DISTANCE
+                && x1 <= car.position.x + CAR_SIZE_F64 + SEPARATION_DISTANCE
                 && y1 == car.position.y
             {
                 return true;
@@ -67,7 +61,7 @@ impl Model {
                 return true;
             }
             if y1 >= car.position.y
-                && y1 <= car.position.y + CAR_SIZE + SEPARATION_DISTANCE
+                && y1 <= car.position.y + CAR_SIZE_F64 + SEPARATION_DISTANCE
                 && x1 == car.position.x
             {
                 return true;
@@ -81,53 +75,61 @@ impl Model {
         match car.destination {
             Destination::Left => match car.direction {
                 Location::West => {
-                    if car.position.x <= (SCREEN_WIDTH + MARGIN) / 2 {
-                        car.direction = Location::South;
-                        car.destination = Destination::Ahead;
+                    if car.position.x <= (SCREEN_WIDTH_F64 + CAR_SIZE_F64 + MARGIN_F64) / 2.0 {
+                        // car.direction = Location::South;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 90.0;
                     }
                 }
                 Location::East => {
-                    if car.position.x >= SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN / 2 {
-                        car.direction = Location::North;
-                        car.destination = Destination::Ahead;
+                    if car.position.x >= (SCREEN_WIDTH_F64  - CAR_SIZE_F64 - MARGIN_F64) / 2.0 {
+                        // car.direction = Location::North;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 270.0;                     
                     }
                 }
                 Location::North => {
-                    if car.position.y <= (SCREEN_HEIGHT + MARGIN) / 2 {
-                        car.direction = Location::West;
-                        car.destination = Destination::Ahead;
+                    if car.position.y <= (SCREEN_HEIGHT_F64 + CAR_SIZE_F64 + MARGIN_F64) / 2.0 {
+                        // car.direction = Location::West;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 180.0;
                     }
                 }
                 Location::South => {
-                    if car.position.y >= SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN / 2 {
-                        car.direction = Location::East;
-                        car.destination = Destination::Ahead;
+                    if car.position.y >= (SCREEN_HEIGHT_F64 - CAR_SIZE_F64 - MARGIN_F64) / 2.0 {
+                        // car.direction = Location::East;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 0.0;
                     }
                 }
             },
             Destination::Right => match car.direction {
                 Location::West => {
-                    if car.position.x <= SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN / 2 {
-                        car.direction = Location::North;
-                        car.destination = Destination::Ahead;
+                    if car.position.x <= (SCREEN_WIDTH_F64 - CAR_SIZE_F64 - MARGIN_F64) / 2.0 {
+                        // car.direction = Location::North;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 270.0;
                     }
                 }
                 Location::East => {
-                    if car.position.x >= (SCREEN_WIDTH + MARGIN) / 2 {
-                        car.direction = Location::South;
-                        car.destination = Destination::Ahead;
+                    if car.position.x >= (SCREEN_WIDTH_F64 + CAR_SIZE_F64 + MARGIN_F64) / 2.0 {
+                        // car.direction = Location::South;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 90.0;
                     }
                 }
                 Location::North => {
-                    if car.position.y <= SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN / 2 {
-                        car.direction = Location::East;
-                        car.destination = Destination::Ahead;
+                    if car.position.y <= (SCREEN_HEIGHT_F64 - CAR_SIZE_F64 - MARGIN_F64) / 2.0 {
+                        // car.direction = Location::East;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 0.0;
                     }
                 }
                 Location::South => {
-                    if car.position.y >= (SCREEN_HEIGHT + MARGIN) / 2 {
-                        car.direction = Location::West;
-                        car.destination = Destination::Ahead;
+                    if car.position.y >= (SCREEN_HEIGHT_F64 + CAR_SIZE_F64 + MARGIN_F64) / 2.0 {
+                        // car.direction = Location::West;
+                        // car.destination = Destination::Ahead;
+                        // car.deg = 180.0;
                     }
                 }
             },
@@ -138,8 +140,8 @@ impl Model {
     pub fn create_road_markings() -> Vec<Line> {
         let mut lines = vec![];
         //Break Point East
-        let start = Point::new(BREAK_POINT_EAST, SCREEN_HEIGHT / 2);
-        let end = Point::new(BREAK_POINT_EAST, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
+        let start = Point::new(BREAK_POINT_EAST as i32, SCREEN_HEIGHT / 2);
+        let end = Point::new(BREAK_POINT_EAST as i32, SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
         let line = Line {
             start,
             end,
@@ -147,8 +149,8 @@ impl Model {
         };
         lines.push(line);
         //Break Point West
-        let start = Point::new(BREAK_POINT_WEST, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
-        let end = Point::new(BREAK_POINT_WEST, SCREEN_HEIGHT / 2);
+        let start = Point::new(BREAK_POINT_WEST as i32, SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT);
+        let end = Point::new(BREAK_POINT_WEST as i32, SCREEN_HEIGHT / 2);
         let line = Line {
             start,
             end,
@@ -156,8 +158,8 @@ impl Model {
         };
         lines.push(line);
         //Break Point North
-        let start = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_NORTH);
-        let end = Point::new(SCREEN_WIDTH / 2 , BREAK_POINT_NORTH);
+        let start = Point::new(SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN + STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_NORTH as i32);
+        let end = Point::new(SCREEN_WIDTH / 2 , BREAK_POINT_NORTH as i32);
         let line = Line {
             start,
             end,
@@ -165,8 +167,8 @@ impl Model {
         };
         lines.push(line);
         //Break Point South
-        let start = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_SOUTH);
-        let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH);
+        let start = Point::new(SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN - STOP_LINE_CURVE_LENGTH_ADJUSTMENT, BREAK_POINT_SOUTH as i32);
+        let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH as i32);
         let line = Line {
             start,
             end,
@@ -180,8 +182,8 @@ impl Model {
                 gap += 25;
                 continue;
             }
-            let start = Point::new(BREAK_POINT_WEST - gap, SCREEN_HEIGHT / 2);
-            let end = Point::new(BREAK_POINT_WEST - 50 - gap, SCREEN_HEIGHT / 2);
+            let start = Point::new(BREAK_POINT_WEST as i32  - gap, SCREEN_HEIGHT / 2);
+            let end = Point::new(BREAK_POINT_WEST as i32  - 50 - gap, SCREEN_HEIGHT / 2);
             let line = Line {
                 start,
                 end,
@@ -196,8 +198,8 @@ impl Model {
                 gap += 25;
                 continue;
             }
-            let start = Point::new(BREAK_POINT_EAST + gap, SCREEN_HEIGHT / 2);
-            let end = Point::new(BREAK_POINT_EAST + 50 + gap, SCREEN_HEIGHT / 2);
+            let start = Point::new(BREAK_POINT_EAST as i32 + gap, SCREEN_HEIGHT / 2);
+            let end = Point::new(BREAK_POINT_EAST as i32 + 50 + gap, SCREEN_HEIGHT / 2);
             let line = Line {
                 start,
                 end,
@@ -212,8 +214,8 @@ impl Model {
                 gap += 25;
                 continue;
             }
-            let start = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_NORTH - gap);
-            let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_NORTH - 50 - gap);
+            let start = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_NORTH as i32 - gap);
+            let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_NORTH as i32 - 50 - gap);
             let line = Line {
                 start,
                 end,
@@ -228,8 +230,8 @@ impl Model {
                 gap += 25;
                 continue;
             }
-            let start = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH + gap);
-            let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH + 50 + gap);
+            let start = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH as i32 + gap);
+            let end = Point::new(SCREEN_WIDTH / 2, BREAK_POINT_SOUTH as i32 + 50 + gap);
             let line = Line {
                 start,
                 end,
@@ -242,19 +244,21 @@ impl Model {
     }
 
     pub fn is_crossing_clear(cars: Vec<Car>) -> bool {
-        let p1 = Point::new(
-            SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN,
-            SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN,
+
+        let p1 = PointF::new(
+            SCREEN_WIDTH_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64,
+            SCREEN_HEIGHT_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64,
         );
-        let p2 = Point::new(
-            SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN,
-            SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN,
+        let p2 = PointF::new(
+            SCREEN_WIDTH_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64,
+            SCREEN_HEIGHT_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64,
         );
+
         for car in &cars {
-            let tl = Point::new(car.position.x, car.position.y);
-            let tr = Point::new(car.position.x + CAR_SIZE, car.position.y);
-            let bl = Point::new(car.position.x, car.position.y + CAR_SIZE);
-            let br = Point::new(car.position.x + CAR_SIZE, car.position.y + CAR_SIZE);
+            let tl = PointF::new(car.position.x - CAR_SIZE_F64/2.0, car.position.y - CAR_SIZE_F64/2.0);
+            let tr = PointF::new(car.position.x + CAR_SIZE_F64/2.0, car.position.y - CAR_SIZE_F64/2.0);
+            let bl = PointF::new(car.position.x - CAR_SIZE_F64/2.0, car.position.y + CAR_SIZE_F64/2.0);
+            let br = PointF::new(car.position.x + CAR_SIZE_F64/2.0, car.position.y + CAR_SIZE_F64/2.0);
             if tl.x > p1.x && tl.x < p2.x && tl.y > p1.y && tl.y < p2.y {
                 return false;
             }
@@ -267,20 +271,21 @@ impl Model {
             if br.x > p1.x && br.x < p2.x && br.y > p1.y && br.y < p2.y {
                 return false;
             }
-        }
+        }       
         true
     }
-
 
 }
 
 #[derive(Clone, Debug)]
 pub struct Car {
-    pub position: Point,
+    pub position: PointF,
     pub size: Dimen,
     pub color: ColorOrUrl,
     pub destination: Destination,
     pub direction: Location,
+    pub deg: f64,
+    pub rad: f64
 }
 impl Car{
     pub fn new(location: Location, destination: Destination) -> Self {
@@ -297,34 +302,58 @@ impl Car{
             Location::North => Location::South,
             Location::South => Location::North,
         };
+
+        let deg = match location {
+            Location::East => 180.0,
+            Location::West => 0.0,
+            Location::North => 90.0,
+            Location::South => 270.0,
+        };
+
+        let rad = match location {
+            Location::East => 180.0_f64.to_radians(),
+            Location::West => 0.0_f64.to_radians(),
+            Location::North => 90.0_f64.to_radians(),
+            Location::South => 270.0_f64.to_radians(),
+        };
+
         Self {
             position,
             size: dimen,
             color: color_or_url,
             destination,
             direction,
+            deg,
+            rad
         }
     }
-    pub fn calculate_initial_position(location: &Location) -> Point {
+    pub fn calculate_initial_position(location: &Location) -> PointF {
         let position = match location {
-            Location::West => Point::new(MARGIN, (SCREEN_HEIGHT - CAR_SIZE * 2 - MARGIN) / 2),
-            Location::North => Point::new((SCREEN_WIDTH + MARGIN) / 2, MARGIN),
-            Location::East => Point::new(
-                SCREEN_WIDTH - CAR_SIZE - MARGIN,
-                (SCREEN_HEIGHT + MARGIN) / 2,
-            ),
-            Location::South => Point::new(
-                (SCREEN_WIDTH - CAR_SIZE * 2 - MARGIN) / 2,
-                SCREEN_HEIGHT - CAR_SIZE - MARGIN,
-            ),
+            Location::West => PointF::new(0.0, (SCREEN_HEIGHT_F64 - MARGIN_F64 - CAR_SIZE_F64)/2.0),
+            Location::North => PointF::new((SCREEN_WIDTH_F64 + MARGIN_F64 + CAR_SIZE_F64)/2.0, 0.0),
+            Location::East => PointF::new(SCREEN_WIDTH_F64,(SCREEN_HEIGHT_F64 + MARGIN_F64 + CAR_SIZE_F64)/2.0),
+            Location::South => PointF::new((SCREEN_WIDTH_F64 - MARGIN_F64 - CAR_SIZE_F64)/2.0, SCREEN_HEIGHT_F64)
         };
+
+        // let position = match location {
+        //     Location::West => PointF::new(MARGIN_F64, (SCREEN_HEIGHT_F64 - CAR_SIZE_F64 * 2.0 - MARGIN_F64) / 2.0),
+        //     Location::North => PointF::new((SCREEN_WIDTH_F64 + MARGIN_F64) / 2.0, MARGIN_F64),
+        //     Location::East => PointF::new(
+        //         SCREEN_WIDTH_F64 - CAR_SIZE_F64 - MARGIN_F64,
+        //         (SCREEN_HEIGHT_F64 + MARGIN_F64) / 2.0,
+        //     ),
+        //     Location::South => PointF::new(
+        //         (SCREEN_WIDTH_F64 - CAR_SIZE_F64 * 2.0 - MARGIN_F64) / 2.0,
+        //         SCREEN_HEIGHT_F64 - CAR_SIZE_F64 - MARGIN_F64,
+        //     ),
+        // };
         position
     }
     pub fn drive(&mut self, cars: &Vec<Car>, traffic_lights: &HashMap<Location, TrafficLight>) {
         //check separation distance
         //West Side
         if self.direction == Location::East {
-            let max_x = self.position.x + CAR_SIZE + SEPARATION_DISTANCE;
+            let max_x = self.position.x + CAR_SIZE_F64 + SEPARATION_DISTANCE;
             for c in cars {
                 if c.direction == Location::East && c.position.x == max_x {
                     return;
@@ -333,7 +362,7 @@ impl Car{
         }
         //East Side
         if self.direction == Location::West {
-            let max_x = self.position.x - CAR_SIZE - SEPARATION_DISTANCE;
+            let max_x = self.position.x - CAR_SIZE_F64 - SEPARATION_DISTANCE;
             for c in cars {
                 if c.direction == Location::West && c.position.x == max_x {
                     return;
@@ -342,7 +371,7 @@ impl Car{
         }
         //North Side
         if self.direction == Location::South {
-            let max_y = self.position.y + CAR_SIZE + SEPARATION_DISTANCE;
+            let max_y = self.position.y + CAR_SIZE_F64 + SEPARATION_DISTANCE;
             for c in cars {
                 if c.direction == Location::South && c.position.y == max_y {
                     return;
@@ -351,7 +380,7 @@ impl Car{
         }
         //South Side
         if self.direction == Location::North {
-            let max_y = self.position.y - CAR_SIZE - SEPARATION_DISTANCE;
+            let max_y = self.position.y - CAR_SIZE_F64 - SEPARATION_DISTANCE;
             for c in cars {
                 if c.direction == Location::North && c.position.y == max_y {
                     return;
@@ -359,51 +388,282 @@ impl Car{
             }
         }
 
-                //check traffic light
+        //check traffic light
         //West Side
-        if self.position.x == SCREEN_WIDTH / 2 - CAR_SIZE * 2 - MARGIN
+        if self.position.x == SCREEN_WIDTH_F64 / 2.0 - CAR_SIZE_F64*1.5 - MARGIN_F64
             && self.direction == Location::East
             && traffic_lights[&Location::West].status == false
         {
             return;
         }
         //East Side
-        if self.position.x == SCREEN_WIDTH / 2 + CAR_SIZE + MARGIN
+        if self.position.x == SCREEN_WIDTH_F64 / 2.0 + CAR_SIZE_F64*1.5 + MARGIN_F64
             && self.direction == Location::West
             && traffic_lights[&Location::East].status == false
         {
             return;
         }
         //South side
-        if self.position.y == SCREEN_HEIGHT / 2 + CAR_SIZE + MARGIN
+        if self.position.y == SCREEN_HEIGHT_F64 / 2.0 + CAR_SIZE_F64*1.5 + MARGIN_F64
             && self.direction == Location::North
             && traffic_lights[&Location::South].status == false
         {
             return;
         }
         //North side
-        if self.position.y == SCREEN_HEIGHT / 2 - CAR_SIZE * 2 - MARGIN
+        if self.position.y == SCREEN_HEIGHT_F64 / 2.0 - CAR_SIZE_F64 * 1.5 - MARGIN_F64
             && self.direction == Location::South
             && traffic_lights[&Location::North].status == false
         {
             return;
         }
 
+        Model::update_direction(self);
+
+        //check turning position      
         match self.direction {
             Location::East => {
-                self.position.x += 1;
+                match self.destination {
+                    Destination::Left => {
+                        if self.position.x + CAR_SIZE_F64/2.0 >= SCREEN_WIDTH_F64 / 2.0  - CAR_SIZE_F64 - MARGIN_F64 {                         
+                            //small radius
+                            let r= CAR_SIZE_F64 + MARGIN_F64/2.0;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg -= deg;
+                            self.rad -= rad;
+
+                            if self.deg.abs() >= 90.0{
+                                self.direction = Location::North;
+                                self.destination = Destination::Ahead;
+                                self.deg = 270.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let dx = r*self.rad.abs().sin();
+                            let x = SCREEN_WIDTH_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64 - CAR_SIZE_F64/2.0 + dx;                        
+                            let dy = r - (self.rad.abs().cos()) * r;                        
+                            let y = SCREEN_HEIGHT_F64/2.0 - MARGIN_F64/2.0 - CAR_SIZE_F64/2.0 - dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+
+                        }
+                    },
+                    Destination::Right => {
+                        if self.position.x + CAR_SIZE_F64/2.0 >= SCREEN_WIDTH_F64 / 2.0  - CAR_SIZE_F64 - MARGIN_F64 {   
+                            //big radius
+                            let r = 2.0 * CAR_SIZE_F64 + 1.5 * MARGIN_F64;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg += deg;
+                            self.rad += rad;
+                            if self.deg.abs() >= 90.0{
+                                self.direction = Location::South;
+                                self.destination = Destination::Ahead;
+                                self.deg = 90.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let dx = r*self.rad.sin();
+                            let x = SCREEN_WIDTH_F64 / 2.0 - CAR_SIZE_F64 - MARGIN_F64 - CAR_SIZE_F64/2.0 + dx;                        
+                            let dy = r - (self.rad.cos()) * r;                        
+                            let y = SCREEN_HEIGHT_F64/2.0 - MARGIN_F64/2.0 - CAR_SIZE_F64/2.0 + dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+
+
+                        }
+                    },
+                    _ => {}
+                }
+            },
+            Location::West => {
+                match self.destination{
+                    Destination::Left => {
+                        if self.position.x - CAR_SIZE_F64/2.0 <= SCREEN_WIDTH_F64 / 2.0  + CAR_SIZE_F64 + MARGIN_F64{
+                            //small radius
+                            let r= CAR_SIZE_F64 + MARGIN_F64/2.0;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg -= deg;
+                            self.rad -= rad;
+                            if self.deg <= 90.0{
+                                self.direction = Location::South;
+                                self.destination = Destination::Ahead;
+                                self.deg = 90.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = 180_f64.to_radians() - self.rad;
+                            let dx = r*a.sin();
+                            let x = SCREEN_WIDTH_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64 + CAR_SIZE_F64/2.0 - dx;                        
+                            let dy =  r - r * a.cos();                        
+                            let y = SCREEN_HEIGHT_F64/2.0 + MARGIN_F64/2.0 + CAR_SIZE_F64/2.0 + dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+                        }
+                    },
+                    Destination::Right => {
+                        if self.position.x - CAR_SIZE_F64/2.0 <= SCREEN_WIDTH_F64 / 2.0  + CAR_SIZE_F64 + MARGIN_F64{
+                            //big radius
+                            let r = 2.0 * CAR_SIZE_F64 + 1.5 * MARGIN_F64;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg += deg;
+                            self.rad += rad;
+                            if self.deg.abs() >= 270.0{
+                                self.direction = Location::North;
+                                self.destination = Destination::Ahead;
+                                self.deg = 270.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = (180_f64.to_radians() - self.rad).abs();
+                            let dx = r*a.sin();
+                            let x = SCREEN_WIDTH_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64 + CAR_SIZE_F64/2.0 - dx;
+                            let dy =  r - r * a.cos(); 
+                            let y = SCREEN_HEIGHT_F64/2.0 + MARGIN_F64/2.0 + CAR_SIZE_F64/2.0 - dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+                        }
+
+                    },
+                    _ => {}
+                }
+            },
+            Location::North => {
+                match self.destination{
+                    Destination::Left => {
+                        if self.position.y - CAR_SIZE_F64/2.0 <= SCREEN_HEIGHT_F64 / 2.0  + CAR_SIZE_F64 + MARGIN_F64{
+                            //small radius
+                            let r= CAR_SIZE_F64 + MARGIN_F64/2.0;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg -= deg;
+                            self.rad -= rad;
+                            if self.deg <= 180.0{
+                                self.direction = Location::West;
+                                self.destination = Destination::Ahead;
+                                self.deg = 180.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = (270_f64.to_radians() - self.rad).abs();
+                            let dx = r - r*a.cos();
+                            let x = SCREEN_WIDTH_F64/2.0 - MARGIN_F64/2.0 - CAR_SIZE_F64/2.0 - dx;
+                            let dy =  r * a.sin(); 
+                            let y = SCREEN_HEIGHT_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64 + CAR_SIZE_F64/2.0 - dy;                         
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+                        }
+                    },
+                    Destination::Right => {
+                        if self.position.y - CAR_SIZE_F64/2.0 <= SCREEN_HEIGHT_F64 / 2.0  + CAR_SIZE_F64 + MARGIN_F64{
+                            //big radius
+                            let r = 2.0 * CAR_SIZE_F64 + 1.5 * MARGIN_F64;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg += deg;
+                            self.rad += rad;
+                            if self.deg >= 360.0{
+                                self.direction = Location::East;
+                                self.destination = Destination::Ahead;
+                                self.deg = 0.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = (270_f64.to_radians() - self.rad).abs();
+                            let dx = r - r*a.cos();
+                            let x = SCREEN_WIDTH_F64/2.0 - MARGIN_F64/2.0 - CAR_SIZE_F64/2.0 + dx;
+                            let dy =  r * a.sin(); 
+                            let y = SCREEN_HEIGHT_F64 / 2.0 + CAR_SIZE_F64 + MARGIN_F64 + CAR_SIZE_F64/2.0 - dy;                         
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+
+                        }  
+                    },
+                    _ => {}
+                }
+            },
+            Location::South => {
+                match self.destination {
+                    Destination::Left => {
+                        if self.position.y + CAR_SIZE_F64/2.0 >= SCREEN_HEIGHT_F64 / 2.0  - CAR_SIZE_F64 - MARGIN_F64 {
+                            //small radius
+                            let r= CAR_SIZE_F64 + MARGIN_F64/2.0;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg -= deg;
+                            self.rad -= rad;
+                            if self.deg <= 0.0{
+                                self.direction = Location::East;
+                                self.destination = Destination::Ahead;
+                                self.deg = 0.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = (90_f64.to_radians() - self.rad).abs();
+                            let dx = r - r * a.cos();
+                            let x = SCREEN_WIDTH_F64 / 2.0 + MARGIN_F64/2.0 + CAR_SIZE_F64/2.0 + dx;                        
+                            let dy = r*a.sin();                        
+                            let y = SCREEN_HEIGHT_F64/2.0 - MARGIN_F64 - CAR_SIZE_F64 - CAR_SIZE_F64/2.0 + dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+                        }
+                    },
+                    Destination::Right => {
+                        if self.position.y + CAR_SIZE_F64/2.0 >= SCREEN_HEIGHT_F64 / 2.0  - CAR_SIZE_F64 - MARGIN_F64 {
+                            //big radius
+                            let r = 2.0 * CAR_SIZE_F64 + 1.5 * MARGIN_F64;
+                            let rad = CAR_SPEED as f64 /r;
+                            let deg = rad.to_degrees();
+                            self.deg += deg;
+                            self.rad += rad;
+                            if self.deg >= 180.0{
+                                self.direction = Location::West;
+                                self.destination = Destination::Ahead;
+                                self.deg = 180.0;
+                                self.rad = self.deg.to_radians();
+                                return;
+                            }
+                            let a = (90_f64.to_radians() - self.rad).abs();
+                            let dx = r - r * a.cos();
+                            let x = SCREEN_WIDTH_F64 / 2.0 + MARGIN_F64/2.0 + CAR_SIZE_F64/2.0 - dx;                        
+                            let dy = r*a.sin();                        
+                            let y = SCREEN_HEIGHT_F64/2.0 - MARGIN_F64 - CAR_SIZE_F64 - CAR_SIZE_F64/2.0 + dy;
+                            self.position.x = x;
+                            self.position.y = y;
+                            return;
+
+                        }
+                    },
+                    _ => {}
+                }
+            } 
+        }       
+
+        match self.direction {
+            Location::East => {
+                self.position.x += CAR_SPEED_F64;
             }
             Location::West => {
-                self.position.x -= 1;
+                self.position.x -= CAR_SPEED_F64;
             }
             Location::North => {
-                self.position.y -= 1;
+                self.position.y -= CAR_SPEED_F64;
             }
             Location::South => {
-                self.position.y += 1;
+                self.position.y += CAR_SPEED_F64;
             }
         }
-        Model::update_direction(self);
+       
     }
 
 }
@@ -420,6 +680,16 @@ impl Point {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct PointF {
+    pub x: f64,
+    pub y: f64,
+}
+impl PointF {
+    pub fn new(x: f64, y: f64) -> Self {
+        Self { x, y }
+    }
+}
 
 #[derive(Clone, Debug)]
 pub struct Dimen {
