@@ -29,8 +29,8 @@ impl View {
         }
 
         //init textures
-        let field_width = (SCREEN_WIDTH / 2 - CAR_SIZE - MARGIN) as u32;
-        let field_heigth = (SCREEN_HEIGHT / 2 - CAR_SIZE - MARGIN) as u32;
+        let field_width = model.config.top_left.x as u32;
+        let field_heigth = model.config.top_left.y as u32;
         let texture_creator = self.canvas.texture_creator();
         let center = Point::new((field_width / 2) as i32, (field_heigth / 2) as i32);
         match texture_creator.load_texture(LANDSCAPE_URL) {
