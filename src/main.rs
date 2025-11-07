@@ -8,6 +8,7 @@ mod constants;
 use controller::Controller;
 use model::Model;
 use view::*;
+use crate::constants::TITLE;
 
 //Memo
 // Ahead - white
@@ -19,7 +20,7 @@ fn main() {
     let mut event_pump = sdl_context.event_pump().unwrap();
     let video_subsystem = sdl_context.video().unwrap();
     let window = video_subsystem
-        .window("road intersection", 800, 600)
+        .window(TITLE, 800, 600)
         .position_centered()
         .build()
         .unwrap();

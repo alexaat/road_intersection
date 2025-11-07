@@ -1,8 +1,0 @@
-[target.wasm32-unknown-emscripten]
-linker = "emcc"
-rustflags = [
-  "-C", "link-args=-sUSE_SDL=2",
-  "-C", "link-args=-sUSE_SDL_IMAGE=2",
-  "-C", "link-args=-sUSE_SDL_TTF=2",
-  "-C", "link-args=-sUSE_SDL_MIXER=2"
-]
